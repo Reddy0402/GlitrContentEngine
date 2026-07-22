@@ -10,17 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_env_file():
+    env_path = BASE_DIR / '.env'
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_env_file()
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z&o)etvq$bi67=z+u4d5o%91nel8442*01lpbj&*@5wn%76&$5'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z&o)etvq$bi67=z+u4d5o%91nel8442*01lpbj&*@5wn%76&$5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,11 +55,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'myapp',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,16 +93,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+DB_NAME = os.getenv('DB_NAME', 'neondb')
+DB_USER = os.getenv('DB_USER', 'neondb_owner')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+DB_HOST = os.getenv('DB_HOST', 'ep-misty-glitter-az8n9km8.c-3.ap-southeast-1.aws.neon.tech')
+DB_PORT = os.getenv('DB_PORT', '5432')
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "neondb",
-        "USER": "neondb_owner",
-        "PASSWORD": "npg_FRvXG0kgzUq7",
-        "HOST": "ep-misty-glitter-az8n9km8.c-3.ap-southeast-1.aws.neon.tech",
-        "PORT": "5432",
-        "OPTIONS": {
-            "sslmode": "require",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+        'OPTIONS': {
+            'sslmode': 'require',
         },
     }
 }
