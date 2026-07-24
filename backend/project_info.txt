@@ -1,0 +1,49 @@
+Project Overview
+================
+
+This is a Django backend project with a simple frontend UI for generating content jobs.
+
+Core Components
+---------------
+- Django project root: `manage.py`
+- Project settings and URL routing: `config/settings.py`, `config/urls.py`
+- Main app: `myapp`
+- Additional service code: `jobs/services/grok_service.py`
+
+myapp Structure
+---------------
+- `myapp/models.py`: Defines the `Jobs` model for content generation jobs.
+- `myapp/admin.py`: Registers the `Jobs` model with Django admin.
+- `myapp/views.py`: Implements API endpoints for job creation, status polling, and health checks.
+- `myapp/Serializers.py`: Defines `JobSerializer` for REST framework serialization.
+- `myapp/urls.py`: Maps API routes like `/api/generate/`, `/api/jobs/<id>/`, and `/api/health/`.
+
+Frontend Structure
+------------------
+- `templates/index.html`: The single page UI that loads CSS and JS.
+- `static/js/app.js`: Handles form submission, API calls, and polling for job status.
+- `static/css/style.css`: Styles the frontend page.
+
+Data Flow
+---------
+1. User visits `/` and fills the form.
+2. Frontend posts data to `/api/generate/`.
+3. Backend creates a `Jobs` record and sets status to `processing`.
+4. The backend uses `grok_service.generate_prompt()` and `grok_service.generate_mock_image()` to produce output.
+5. The job status is updated to `completed` or `failed`.
+6. The frontend polls `/api/jobs/<id>/` and displays results.
+
+Current Issue
+-------------
+The project is encountering a Django template rendering error in the admin interface caused by a compatibility issue between Python 3.14 and Django 4.2.30.
+
+Error Summary:
+- Exception occurs in `django.template.context.Context.__copy__`
+- `super().__copy__()` fails because the parent `super` object does not have `dicts`
+- This is likely an environment incompatibility between the installed Django code and Python version
+
+Important Notes
+---------------
+- The serializer lists `updated_at` as read-only, but the model does not define an `updated_at` field.
+- The `generate_job` view downloads a mock image from `pollinations.ai` instead of integrating a real image generation backend.
+- Database configuration is set for PostgreSQL via environment variables.
