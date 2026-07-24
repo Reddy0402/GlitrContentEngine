@@ -5,8 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-# For quick local testing of the API POST from browser/front-end without CSRF token
-from django.views.decorators.csrf import csrf_exempt
+# CSRF is handled on the frontend; do not exempt the view in production
 
 from .models import Jobs
 from .Serializers import JobSerializer
@@ -25,7 +24,6 @@ def health_check(request):
             "status": "healthy"
         }
     )
-@csrf_exempt
 @api_view(["POST"])
 def generate_job(request):
     logger.info("generate_job called: method=%s, path=%s", request.method, request.path)
