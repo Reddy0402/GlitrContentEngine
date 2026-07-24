@@ -5,8 +5,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+# For quick local testing of the API POST from browser/front-end without CSRF token
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Jobs
 from .Serializers import JobSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     """Render the main frontend page"""
@@ -19,8 +25,19 @@ def health_check(request):
             "status": "healthy"
         }
     )
+@csrf_exempt
 @api_view(["POST"])
 def generate_job(request):
+    logger.info("generate_job called: method=%s, path=%s", request.method, request.path)
+    # Log CSRF-related headers and cookies for debugging
+    try:
+        csrf_header = request.META.get('HTTP_X_CSRFTOKEN')
+        cookie_header = request.META.get('HTTP_COOKIE')
+        logger.info("CSRF header: %s", csrf_header)
+        logger.info("Cookie header: %s", cookie_header)
+    except Exception:
+        logger.exception("Error reading request META for CSRF debug")
+
     data = request.data.copy()
     if 'product_description' in data:
         data['description'] = data['product_description']
