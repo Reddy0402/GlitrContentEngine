@@ -20,9 +20,21 @@ form.addEventListener('submit', async (e) => {
     generateBtn.textContent = 'Generating...';
     
     try {
+        // Include CSRF token for Django CSRF protection
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]+)'));
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
         const response = await fetch('/api/generate/', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            credentials: 'same-origin'
         });
 
         if (!response.ok) {
