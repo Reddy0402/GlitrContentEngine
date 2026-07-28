@@ -5,6 +5,8 @@ Project Structure
 
 The project is organized into the following main components:
 
+deploy Link: https://glitrcontentengine-3.onrender.com
+
 manage.py – Entry point for running Django management commands.
 config/ – Contains the project's settings and URL configuration (settings.py and urls.py).
 myapp/ – Main application responsible for models, serializers, views, and API endpoints.
